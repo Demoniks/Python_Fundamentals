@@ -332,8 +332,10 @@ print(dog.speak())`,
             </div>
           </div>
 
-          {currentSection.concepts.map((concept) => (
-            <div key={`${activeSection}-${concept.name}`} className="bg-white rounded-lg shadow-lg overflow-hidden">
+          {currentSection.concepts.map((concept) => {
+            const conceptKey = `${activeSection}-${concept.name.replaceAll(/\s+/g, '-').toLowerCase()}`;
+            return (
+            <div key={conceptKey} className="bg-white rounded-lg shadow-lg overflow-hidden">
               <div className="bg-indigo-600 text-white px-6 py-4">
                 <h3 className="text-xl font-semibold">{concept.name}</h3>
               </div>
@@ -347,7 +349,7 @@ print(dog.speak())`,
 
                 <div className="flex gap-3 mb-4">
                   <button
-                    onClick={() => runCode(concept.code, `${activeSection}-${idx}`)}
+                    onClick={() => runCode(concept.code, conceptKey)}
                     className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                   >
                     <Play className="w-4 h-4" />
@@ -355,10 +357,10 @@ print(dog.speak())`,
                   </button>
                 </div>
 
-                {outputs[`${activeSection}-${idx}`] && (
+                {outputs[conceptKey] && (
                   <div className="bg-gray-100 rounded-lg p-4 mb-4">
                     <div className="text-sm font-semibold text-gray-700 mb-2">Output:</div>
-                    <pre className="text-sm text-gray-800">{outputs[`${activeSection}-${idx}`]}</pre>
+                    <pre className="text-sm text-gray-800">{outputs[conceptKey]}</pre>
                   </div>
                 )}
 
@@ -370,7 +372,7 @@ print(dog.speak())`,
                 </div>
               </div>
             </div>
-          ))}
+          )})}
         </div>
       </div>
 
