@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { Play, BookOpen, Code, Lightbulb } from 'lucide-react';
+import { Play, BookOpen, Code, Lightbulb, ActivitySquare } from 'lucide-react';
+import CodeEditor from './CodeEditor';
 
 const PythonBasicsGuide = () => {
   const [activeSection, setActiveSection] = useState('variables');
   const [outputs, setOutputs] = useState({});
+  const [viewMode, setViewMode] = useState('learn');
+  // 'learn' = topics view, 'editor' = code editor view
 
   const sections = {
     variables: {
@@ -282,7 +285,7 @@ print(dog.speak())`,
 
   const runCode = (code, key) => {
     // Show confirmation that code would run
-    setOutputs({...outputs, [key]: '✓ Code example ready! Copy this to your Python environment to see the actual output.'});
+    setOutputs({ ...outputs, [key]: '✓ Code example ready! Copy this to your Python environment to see the actual output.' });
   };
 
   const currentSection = sections[activeSection];
@@ -300,79 +303,146 @@ print(dog.speak())`,
           <div className="bg-white rounded-lg shadow p-4 sticky top-4">
             <h2 className="text-lg font-semibold mb-4 text-gray-800">Topics</h2>
             <nav className="space-y-2">
-              {Object.entries(sections).map(([key, section]) => (
+              {/* View Mode Selector */}
+              <div className="mb-4 pb-4 border-b border-gray-200">
+                <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">
+                  Mode
+                </h3>
                 <button
-                  key={key}
-                  onClick={() => setActiveSection(key)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                    activeSection === key
+                  onClick={() => setViewMode('learn')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all mb-2 ${viewMode === 'learn'
                       ? 'bg-indigo-600 text-white shadow-md'
                       : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
-                  }`}
+                    }`}
                 >
-                  {section.icon}
-                  <span className="text-sm font-medium">{section.title}</span>
+                  <BookOpen className="w-5 h-5" />
+                  <span className="text-sm font-medium">Learn Topics</span>
                 </button>
-              ))}
+                <button
+                  onClick={() => setViewMode('editor')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${viewMode === 'editor'
+                      ? 'bg-green-600 text-white shadow-md'
+                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                    }`}
+                >
+                  <Code className="w-5 h-5" />
+                  <span className="text-sm font-medium">Code Editor</span>
+                </button>
+              </div>
+
+              {/* Topic Navigation - Only show when in Learn mode */}
+              {viewMode === 'learn' && (
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">
+                    Topics
+                  </h3>
+                  {Object.entries(sections).map(([key, section]) => (
+                    <button
+                      key={key}
+                      onClick={() => setActiveSection(key)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeSection === key
+                          ? 'bg-indigo-600 text-white shadow-md'
+                          : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                        }`}
+                    >
+                      {section.icon}
+                      <span className="text-sm font-medium">{section.title}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </nav>
           </div>
         </div>
 
         {/* Content */}
         <div className="lg:col-span-3 space-y-6">
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="flex items-start gap-4 mb-4">
-              <div className="p-3 bg-indigo-100 rounded-lg">
-                {currentSection.icon}
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">{currentSection.title}</h2>
-                <p className="text-gray-600 mt-1">{currentSection.description}</p>
-              </div>
-            </div>
-          </div>
-
-          {currentSection.concepts.map((concept) => {
-            const conceptKey = `${activeSection}-${concept.name.replaceAll(/\s+/g, '-').toLowerCase()}`;
-            return (
-            <div key={conceptKey} className="bg-white rounded-lg shadow-lg overflow-hidden">
-              <div className="bg-indigo-600 text-white px-6 py-4">
-                <h3 className="text-xl font-semibold">{concept.name}</h3>
-              </div>
-              
-              <div className="p-6">
-                <div className="bg-gray-900 rounded-lg p-4 mb-4">
-                  <pre className="text-green-400 text-sm overflow-x-auto">
-                    <code>{concept.code}</code>
-                  </pre>
-                </div>
-
-                <div className="flex gap-3 mb-4">
-                  <button
-                    onClick={() => runCode(concept.code, conceptKey)}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-                  >
-                    <Play className="w-4 h-4" />
-                    Run Example
-                  </button>
-                </div>
-
-                {outputs[conceptKey] && (
-                  <div className="bg-gray-100 rounded-lg p-4 mb-4">
-                    <div className="text-sm font-semibold text-gray-700 mb-2">Output:</div>
-                    <pre className="text-sm text-gray-800">{outputs[conceptKey]}</pre>
+          {/* Conditional rendering based on viewMode */}
+          {viewMode === 'learn' ? (
+            // Learn Mode - Show topics (your existing code)
+            <>
+              <div className="bg-white rounded-lg shadow-lg p-6">
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="p-3 bg-indigo-100 rounded-lg">
+                    {currentSection.icon}
                   </div>
-                )}
-
-                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
-                  <div className="flex items-start gap-2">
-                    <Lightbulb className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-gray-700">{concept.explanation}</p>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      {currentSection.title}
+                    </h2>
+                    <p className="text-gray-600 mt-1">{currentSection.description}</p>
                   </div>
                 </div>
               </div>
-            </div>
-          )})}
+
+              {currentSection.concepts.map((concept) => {
+                const conceptKey =
+                  `${activeSection}-${concept.name.replace(/\s+/g, '-').toLowerCase()}`;
+                return (
+                  <div key={conceptKey} className="
+                    bg-white
+                    rounded-lg
+                    shadow-lg
+                    overflow-hidden
+                    ">
+                    <div className="bg-indigo-600 text-white px-6 py-4">
+                      <h3 className="text-xl font-semibold">{concept.name}</h3>
+                    </div>
+
+                    <div className="p-6">
+                      <div className="bg-gray-900 rounded-lg p-4 mb-4">
+                        <pre className="text-green-400 text-sm overflow-x-auto">
+                          <code>{concept.code}</code>
+                        </pre>
+                      </div>
+
+                      <div className="flex gap-3 mb-4">
+                        <button
+                          onClick={() => runCode(concept.code, conceptKey)}
+                          className="
+                            flex items-center
+                            gap-2
+                            px-4
+                            py-2
+                            bg-green-600
+                            text-white
+                            rounded-lg
+                            hover:bg-green-700
+                            transition"
+                        >
+                          <Play className="w-4 h-4" />
+                          Run Example
+                        </button>
+                      </div>
+
+                      {outputs[conceptKey] && (
+                        <div className="bg-gray-100 rounded-lg p-4 mb-4">
+                          <div className="text-sm font-semibold text-gray-700 mb-2">
+                            Output:
+                          </div>
+                          <pre className="text-sm text-gray-800">{outputs[conceptKey]}
+                          </pre>
+                        </div>
+                      )}
+
+                      <div className="
+                        bg-blue-50 border-l-4
+                        border-blue-500
+                        p-4 rounded">
+                        <div className="flex items-start gap-2">
+                          <Lightbulb className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                          <p className="text-sm text-gray-700">{concept.explanation}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </>
+          ) : (
+            // Editor Mode - Show code editor
+            <CodeEditor />
+          )}
         </div>
       </div>
 
